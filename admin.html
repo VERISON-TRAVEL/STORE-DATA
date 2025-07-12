@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>ADMIN - Mise à jour ORAN</title>
+  <title>Admin Verison</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -41,24 +41,24 @@
       margin-top: 15px;
       font-weight: bold;
     }
-    #adminForm, #editor {
+    #editor {
       display: none;
     }
   </style>
 </head>
 <body>
-  <h1>🔐 Accès Admin</h1>
+  <h1>🔐 Espace Admin</h1>
 
-  <!-- Password Screen -->
+  <!-- Mot de passe d'accès -->
   <div id="adminForm">
     <label for="admin-password">Mot de passe :</label>
     <input type="password" id="admin-password" placeholder="Entrez le mot de passe">
     <button onclick="verifyPassword()">Se connecter</button>
   </div>
 
-  <!-- Formulaire d’édition -->
+  <!-- Formulaire de modification -->
   <div id="editor">
-    <label for="token">Ton Token</label>
+    <label for="token">Ton GitHub Token :</label>
     <input type="password" id="token" placeholder="ghp_...">
 
     <label for="price">Prix (ex: 19,000 DA) :</label>
@@ -72,9 +72,7 @@
   </div>
 
   <script>
-    const ADMIN_PASSWORD = "Verison.2025"; // 🔒 Modifie ici ton mot de passe
-
-    document.getElementById("adminForm").style.display = "block";
+    const ADMIN_PASSWORD = "verison2025"; // 🔒 change ici ton mot de passe
 
     function verifyPassword() {
       const input = document.getElementById("admin-password").value;
