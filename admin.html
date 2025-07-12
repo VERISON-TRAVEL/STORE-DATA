@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>ADMIN - Mise à jour ORAN</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 30px;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #6A1B9A;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      background: #6A1B9A;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .status {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    #adminForm, #editor {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔐 Accès Admin</h1>
+
+  <!-- Password Screen -->
+  <div id="adminForm">
+    <label for="admin-password">Mot de passe :</label>
+    <input type="password" id="admin-password" placeholder="Entrez le mot de passe">
+    <button onclick="verifyPassword()">Se connecter</button>
+  </div>
+
+  <!-- Formulaire d’édition -->
+  <div id="editor">
+    <label for="token">Ton Token</label>
+    <input type="password" id="token" placeholder="ghp_...">
+
+    <label for="price">Prix (ex: 19,000 DA) :</label>
+    <input type="text" id="price" placeholder="Ex: 19000 DA">
+
+    <label for="dates">Dates de départ (séparées par virgule) :</label>
+    <textarea id="dates" rows="3" placeholder="12-07-2025, 19-07-2025, 26-07-2025"></textarea>
+
+    <button onclick="updateData()">💾 Mettre à jour</button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = "Verison.2025"; // 🔒 Modifie ici ton mot de passe
+
+    document.getElementById("adminForm").style.display = "block";
+
+    function verifyPassword() {
+      const input = document.getElementById("admin-password").value;
+      if (input === ADMIN_PASSWORD) {
+        document.getElementById("adminForm").style.display = "none";
+        document.getElementById("editor").style.display = "block";
+      } else {
+        alert("❌ Mot de passe incorrect.");
+      }
+    }
+
+    async function updateData() {
+      const token = document.getElementById("token").value.trim();
+      const price = document.getElementById("price").value.trim();
+      const dates = document.getElementById("dates").value.split(",").map(d => d.trim());
+      const status = document.getElementById("status");
+
+      if (!token || !price || dates.length === 0) {
+        status.innerText = "❌ Veuillez remplir tous les champs.";
+        return;
+      }
+
+      const repo = "VERISON-TRAVEL/STORE-DATA";
+      const path = "departures.json";
+
+      const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: "application/vnd.github.v3+json"
+        }
+      });
+
+      if (!getRes.ok) {
+        status.innerText = "❌ Échec de lecture du fichier.";
+        return;
+      }
+
+      const fileData = await getRes.json();
+      const sha = fileData.sha;
+      let content = atob(fileData.content);
+      let json = JSON.parse(content);
+
+      json["ORAN"] = {
+        price: price,
+        dates: dates
+      };
+
+      const newContent = btoa(JSON.stringify(json, null, 2));
+
+      const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: "application/vnd.github.v3+json"
+        },
+        body: JSON.stringify({
+          message: "Mise à jour ORAN via admin.html",
+          content: newContent,
+          sha: sha
+        })
+      });
+
+      if (putRes.ok) {
+        status.innerText = "✅ Données mises à jour avec succès !";
+      } else {
+        status.innerText = "❌ Erreur lors de l'envoi.";
+      }
+    }
+  </script>
+</body>
+</html>
